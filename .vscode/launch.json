@@ -4,11 +4,22 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug SQS Node",
+            "program": "${workspaceFolder}/my-sqs-messages-function.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Hello Node",
+            "program": "${workspaceFolder}/hello-node.js"
+        },
         {
             "type": "node",
             "request": "attach",
-            "name": "Attach",
+            "name": "Chrome Attach",
             "port": 9229
         },
         {
