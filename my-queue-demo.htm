@@ -13,59 +13,64 @@
 	AWS.config.credentials = new AWS.CognitoIdentityCredentials({
 		IdentityPoolId: 'us-east-1:3734c563-7053-46c7-86b9-8ee47c9adde8',
 	});
-    let SQS = new AWS.SQS({"region" : "us-east-1", "apiVersion" : "2015-03-31"});
+    let SQS = new AWS.SQS({
+			"region" : "us-east-1", 
+			"apiVersion" : "2012-11-05"
+		});
 
     function initUi() {
-		$("#empId").val("1");
-		$("#supId").val("0");
-		$("#login").val("Joe");
-		$("#pwd").val("Secrets");
-		$("#empTitle").val("Pres");
+			$("#empId").val("1");
+			$("#supId").val("0");
+			$("#login").val("Joe");
+			$("#pwd").val("Secrets");
+			$("#empTitle").val("Pres");
     };
 
     function displayResponse(ans) {
-		//alert(ans); // JSON.stringify(ans); //filter ['StatusCode']
-		var response = ans == null ? {} : JSON.parse(ans.Payload);  // a string
-		var myObj = JSON.parse(response);
-		alert(JSON.stringify(myObj.ResponseMetadata)); // stringify returns a pre-formatted string !
-		//response = response.replace("\t", " ");
-		var myMessage = JSON.stringify(myObj.ResponseMetadata);
-		$("#responseArea").html("<pre>" + myMessage + "</pre>"); // potus
-		//$("#responseArea").text(JSON.stringify(ans, null, "\n"));
-    };
-    
-	function sendMessageUsingLambda() {
-
-		var queryParams = {};
-		queryParams.TableName = "employees";
-//alert("todo 20");
-		var item = {};
-		item.emp_id = $("#empId").val();
-		item.sup_id = $("#supId").val();
-		item.login = $("#login").val();
-		item.pwd = $("#pwd").val();
-		item.emp_title = $("#empTitle").val();
-		queryParams.Item = item;
-//alert("todo 30");
-		var lambdaParams = {};
-		lambdaParams.httpMethod = 'GET';
-		lambdaParams.body = queryParams;
-//alert("todo 40");
-		let invokeParams = {
-			"FunctionName" : "MyAuroraEmployeesFunction",
-			"InvocationType" : "RequestResponse",
-			"Payload" : JSON.stringify(lambdaParams)
+			/*
+			alert(ans); // JSON.stringify(ans); //filter ['StatusCode']
+			var response = ans == null ? {} : JSON.parse(ans.Payload);  // a string
+			var myObj = JSON.parse(response);
+			alert(JSON.stringify(myObj.ResponseMetadata)); // stringify returns a pre-formatted string !
+			//response = response.replace("\t", " ");
+			var myMessage = JSON.stringify(myObj.ResponseMetadata);
+			$("#responseArea").html("<pre>" + myMessage + "</pre>"); // potus
+			*/
+			$("#responseArea").html(JSON.stringify(ans, null, "<br/>"));
 		};
-//alert("todo 50");
-		LAMBDA.invoke(invokeParams, function(err, data) {
+    
+	function sendMsgToSqs() {
+		var messageParams = {};
+		messageParams.QueueUrl = "https://sqs.us-east-1.amazonaws.com/672312526406/MyFifoQueue.fifo";
+		messageParams.MessageGroupId = "MyFicoQueueMessages";
+
+		var messageBody = {};
+		messageBody.emp_id = $("#empId").val();
+		messageBody.sup_id = $("#supId").val();
+		messageBody.login = $("#login").val();
+		messageBody.pwd = $("#pwd").val();
+		messageBody.emp_title = $("#empTitle").val();
+		messageParams.MessageBody = JSON.stringify(messageBody);
+
+		var messageAttributes = {};
+		messageAttributes.emp_id = {};
+		messageAttributes.emp_id.DataType = "String";
+		messageAttributes.emp_id.StringValue = $("#empId").val();
+		messageAttributes.emp_title = {};
+		messageAttributes.emp_title.DataType = "String";
+		messageAttributes.emp_title.StringValue = $("#empId").val();
+
+		messageParams.MessageAttributes = messageAttributes;
+
+		SQS.sendMessage(messageParams, function(err, data) {
 			var ans = "";
 			if (err) {
 				ans = "Error : " + err;
 			} else {
 				ans = data;
 			}
-//alert("todo 60 ans = " + ans);
-			displayEmployees(ans);
+
+			displayResponse(ans);
 		});
 	};
 
@@ -79,11 +84,11 @@
     <br>
     Login : <input id="login" type="text" value="" />
     <br>
-    Password :  <input id="pwd" type="text" value="" />
+    Password : <input id="pwd" type="text" value="" />
     <br>
     Employee Title :  <input id="empTitle" type="text" value="" />
     <br />
-    <button onclick="sendMessageUsingLambda();">Send Message Using Lambda</button>
+    <button onclick="sendMsgToSqs();">Send Message Using Lambda</button>
     <script>
         initUi();
     </script>

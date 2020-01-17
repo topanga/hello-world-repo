@@ -23,6 +23,12 @@
             "type": "chrome",
             "request": "launch",
             "file": "C:/temp/it460/2020/spring/setup/lambda-rds/lambda-aurora/get-employees.htm"
+        },        {
+            "name": "Launch my-queue-demo.htm",
+            "type": "chrome",
+            "request": "launch",
+            "file": "C:/dev/dev-workspaces-2020/git-helloworld-repo/hello-world-repo/my-queue-demo.htm"
         },
+
     ]
 }
