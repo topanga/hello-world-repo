@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Demo Message Queues Using SQS</title>
+<script type="text/javascript" src="http://onclick.com/projects/courses/js/jquery-1.8.0.min.js"></script>
+<!-- script type="text/javascript" src="http://onclick.com/projects/courses/js/jquery-ui/jquery-ui-1.12.1/jquery-ui.min.js" -->
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.410.0.min.js"></script>
+<!-- script type="text/javascript" src="https://onclick.com/projects/courses/js/aws/sdk/browser-js-2.6/aws-sdk.min-2.6.js" -->
+<script type="text/javascript">
+
+	// globals
+	AWS.config.region = 'us-east-1'; // Region
+	AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+		IdentityPoolId: 'us-east-1:3734c563-7053-46c7-86b9-8ee47c9adde8',
+	});
+    let SQS = new AWS.SQS({"region" : "us-east-1", "apiVersion" : "2015-03-31"});
+
+    function initUi() {
+		$("#empId").val("1");
+		$("#supId").val("0");
+		$("#login").val("Joe");
+		$("#pwd").val("Secrets");
+		$("#empTitle").val("Pres");
+    };
+
+    function displayResponse(ans) {
+		//alert(ans); // JSON.stringify(ans); //filter ['StatusCode']
+		var response = ans == null ? {} : JSON.parse(ans.Payload);  // a string
+		var myObj = JSON.parse(response);
+		alert(JSON.stringify(myObj.ResponseMetadata)); // stringify returns a pre-formatted string !
+		//response = response.replace("\t", " ");
+		var myMessage = JSON.stringify(myObj.ResponseMetadata);
+		$("#responseArea").html("<pre>" + myMessage + "</pre>"); // potus
+		//$("#responseArea").text(JSON.stringify(ans, null, "\n"));
+    };
+    
+	function sendMessageUsingLambda() {
+
+		var queryParams = {};
+		queryParams.TableName = "employees";
+//alert("todo 20");
+		var item = {};
+		item.emp_id = $("#empId").val();
+		item.sup_id = $("#supId").val();
+		item.login = $("#login").val();
+		item.pwd = $("#pwd").val();
+		item.emp_title = $("#empTitle").val();
+		queryParams.Item = item;
+//alert("todo 30");
+		var lambdaParams = {};
+		lambdaParams.httpMethod = 'GET';
+		lambdaParams.body = queryParams;
+//alert("todo 40");
+		let invokeParams = {
+			"FunctionName" : "MyAuroraEmployeesFunction",
+			"InvocationType" : "RequestResponse",
+			"Payload" : JSON.stringify(lambdaParams)
+		};
+//alert("todo 50");
+		LAMBDA.invoke(invokeParams, function(err, data) {
+			var ans = "";
+			if (err) {
+				ans = "Error : " + err;
+			} else {
+				ans = data;
+			}
+//alert("todo 60 ans = " + ans);
+			displayEmployees(ans);
+		});
+	};
+
+
+</script>
+</head>
+<body>
+    Employee Id : <input id="empId" type="text" value="" />
+    <br>
+    Supervisor Id : <input id="supId" type="text" value="" />
+    <br>
+    Login : <input id="login" type="text" value="" />
+    <br>
+    Password :  <input id="pwd" type="text" value="" />
+    <br>
+    Employee Title :  <input id="empTitle" type="text" value="" />
+    <br />
+    <button onclick="sendMessageUsingLambda();">Send Message Using Lambda</button>
+    <script>
+        initUi();
+    </script>
+    <br />
+    <div id="responseArea">
+
+    </div>
+</body>
+</html>

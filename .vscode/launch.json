@@ -4,12 +4,25 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach",
+            "port": 9229
+        },
         {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
-        }
+        },
+        {
+            "name": "Launch get-employees.htm",
+            "type": "chrome",
+            "request": "launch",
+            "file": "C:/temp/it460/2020/spring/setup/lambda-rds/lambda-aurora/get-employees.htm"
+        },
     ]
 }
