@@ -7,6 +7,12 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Debug Guest Book Node",
+            "program": "${workspaceFolder}/my-guest-book.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Debug SQS Node",
             "program": "${workspaceFolder}/my-sqs-messages-function.js"
         },

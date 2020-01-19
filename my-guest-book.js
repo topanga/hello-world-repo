@@ -6,8 +6,8 @@ exports.handler = function(e, ctx, callback) {
 
     var params = {
         Item : {
-            posted : Date.now(),
-            post : "A user post"
+            posted : "" + Date.now(),
+            post : "I wrote this " + Date.now()
         },
         TableName : 'MyGuestBookDynDbTable'
     }
