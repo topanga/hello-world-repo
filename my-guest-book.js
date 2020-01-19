@@ -2,7 +2,7 @@ console.log('starting my log book');
 const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient({region:'us-east-1'});
 
-exports.handle = function(e, ctx, callback) {
+exports.handler = function(e, ctx, callback) {
 
     var params = {
         Item : {
