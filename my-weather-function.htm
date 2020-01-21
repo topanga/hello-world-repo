@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script language="JavaScript">
+/*
+                    beforeSend: function(request) {
+                        request.setRequestHeader("Header-Allow-Origin", "*");
+                    },
+
+                    ,
+                    error : function(jqXHR, textStatus, errorThrown) {
+                        alert('Sorry ' + textStatus + ", " + errorThrown);
+                    }
+*/
+            var API_URL = 'https://cgmlyqlmnf.execute-api.us-east-1.amazonaws.com/Prod/weatherservice/';
+    
+            function getWeather() {
+                    
+                $("#ajaxResponse").html("");
+                // ?zip=02125&appid=e94509746fcee9d5f653dc72032d3644
+                var myUrl = API_URL + "?zip=" + encodeURIComponent($('#zip').val());
+                myUrl += "&appid=" +  encodeURIComponent($('#appid').val());           
+
+                $.ajax({
+                    type : 'GET',
+                    url : myUrl,
+                    success : function(data) {
+                        var cleanStr = JSON.stringify(data);
+                        $("#ajaxResponse").html("<pre>" + cleanStr.split('\\\"').join('\'') + "</pre>");
+                        cleanObj = JSON.parse(cleanStr);
+                        //alert("Status Code : " + cleanObj.statusCode);
+                        
+                        var bodyObj = JSON.parse(cleanObj.body);
+                        //alert("Body : " + bodyObj);
+                        var main = bodyObj.main;
+                        var kelvin = Number(main.temp); // 269.13
+                        var base = Number("273.15");
+                        var temp = (kelvin - base) * 9/5 + 32; // 13.10
+                        $("#temperature").html(parseInt(temp));
+                    }
+                });
+            };
+            /*
+
+            $.ajax({
+    url: 'URL',
+    type: 'POST',
+    data: yourData,
+    datatype: 'json'
+})
+.done(function (data) { successFunction(data); })
+.fail(function (jqXHR, textStatus, errorThrown) { serrorFunction(); });
+
+                            data : JSON.stringify({}),
+                    contentType : "application/json",
+                    cache : false,
+                    headers : {
+                        "Accept" : "application/json",
+                        "Cache-Control": "max=0",
+                        "Access-Control-Allow-Origin" : "*"
+                    },
+            */
+        </script>
+    </head>
+    <body>
+        <!--
+            SOAPUI
+GET works using soapui https://wpmlb110e4.execute-api.us-east-1.amazonaws.com/prod/myWeatherFunction2/02125
+POST  works using {
+  "queryStringParameters": {
+    "zip": "75618",
+    "appid": "e94509746fcee9d5f653dc72032d3644"
+  }
+}
+        -->
+        <h3>My Weather App</h3>
+        Zip : <input id="zip" value="02125"> Temperature : <span id="temperature">?</span> degrees
+        <br />
+        App ID : <input id="appid" value="e94509746fcee9d5f653dc72032d3644">
+        <button id="submitButton" onclick="javascript:getWeather();">Submit</button>
+        <button id="clearButton" onclick="javascript:location.reload();">Clear</button>
+        <div id="ajaxResponse">
+    
+        </div>
+    </body>
+</html>

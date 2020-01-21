@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Demo Orders Queue Using SQS</title>
+<script src="https://my-websites-bucket.s3.amazonaws.com/jquery-1.8.0.min.js"></script>
+<!-- script type="text/javascript" src="http://onclick.com/projects/courses/js/jquery-1.8.0.min.js" /script -->
+<!-- script type="text/javascript" src="http://onclick.com/projects/courses/js/jquery-ui/jquery-ui-1.12.1/jquery-ui.min.js" -->
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.410.0.min.js"></script>
+<!-- script type="text/javascript" src="https://onclick.com/projects/courses/js/aws/sdk/browser-js-2.6/aws-sdk.min-2.6.js" -->
+<script type="text/javascript">
+
+	// globals
+	AWS.config.region = 'us-east-1'; // Region
+	AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+		IdentityPoolId: 'us-east-1:3734c563-7053-46c7-86b9-8ee47c9adde8',
+	});
+    let SQS = new AWS.SQS({
+			"region" : "us-east-1", 
+			"apiVersion" : "2012-11-05"
+		});
+
+    function initUi() {
+			$("#userId").val("1");
+			$("#orderTime").val(new Date().toISOString().replace("T", " ").replace("Z", " ").slice(0, -5));
+			$("#itemOrdered").val("onions");
+			$("#totalAmount").val("8.35");
+    };
+
+    function displayResponse(ans) {
+        // apex config http://apex.run/#aws-credentials
+			/* TODO
+			alert(ans); // JSON.stringify(ans); //filter ['StatusCode']
+			var response = ans == null ? {} : JSON.parse(ans.Payload);  // a string
+			var myObj = JSON.parse(response);
+			alert(JSON.stringify(myObj.ResponseMetadata)); // stringify returns a pre-formatted string !
+			//response = response.replace("\t", " ");
+			var myMessage = JSON.stringify(myObj.ResponseMetadata);
+			$("#responseArea").html("<pre>" + myMessage + "</pre>"); // potus
+			*/
+            $("#responseArea").html(JSON.stringify(ans, null, "<br/>"));
+            if (ans && ans.MessageId && ans.MessageId.length > 0) {
+                location.reload();
+            }
+		};
+    
+	function sendMsgToSqs() {
+		var messageParams = {};
+		messageParams.QueueUrl = "https://sqs.us-east-1.amazonaws.com/672312526406/myOrdersFifoQueue.fifo";
+		messageParams.MessageGroupId = "MyOrdersFicoQueueMessages";
+
+		var messageBody = {};
+		messageBody.user_id = $("#userId").val();
+		messageBody.order_time = $("#orderTime").val();
+		messageBody.item_ordered = $("#itemOrdered").val();
+		messageBody.total_amount = $("#totalAmount").val();
+		messageParams.MessageBody = JSON.stringify(messageBody);
+
+		var messageAttributes = {};
+		messageAttributes.user_id = {};
+		messageAttributes.user_id.DataType = "String";
+        messageAttributes.user_id.StringValue = $("#userId").val();
+        
+		messageAttributes.order_time = {};
+		messageAttributes.order_time.DataType = "String";
+        messageAttributes.order_time.StringValue = $("#orderTime").val();
+        
+        messageAttributes.item_ordered = {};
+		messageAttributes.item_ordered.DataType = "String";
+        messageAttributes.item_ordered.StringValue = $("#itemOrdered").val();
+        
+        messageAttributes.total_amount = {};
+		messageAttributes.total_amount.DataType = "String";
+		messageAttributes.total_amount.StringValue = $("#totalAmount").val();
+
+		messageParams.MessageAttributes = messageAttributes;
+
+		SQS.sendMessage(messageParams, function(err, data) {
+			var ans = "";
+			if (err) {
+				ans = "Error : " + err;
+			} else {
+				ans = data;
+			}
+
+            displayResponse(ans);
+            /*
+            {
+                "ResponseMetadata": {
+                    "RequestId": "b844f1fc-d9ca-52ce-90c6-a763b4c42691"
+                },
+                "MD5OfMessageBody": "bde9714cc21eabbd5ef8fde6954492e4",
+                "MD5OfMessageAttributes": "3f60f50211f2e27fce40063a2be41bfa",
+                "MessageId": "38268a83-a5a5-4ed8-807f-cb8f59ad7b6c",
+"               SequenceNumber": "18851098756212464128"
+            }
+            */
+		});
+    };
+
+	function showOrdersUsingDynamo() {
+		let docClient = new AWS.DynamoDB.DocumentClient();
+        let queryInput = {
+			"TableName" : "orders",
+			"KeyConditionExpression" : "user_id = :id and begins_with(order_time, :ts)",
+			"ExpressionAttributeValues" : {
+				":id" : $("#userId").val(),
+				":ts" : "2020-01"
+			}
+        };
+		docClient.query(queryInput, function (err, data) {
+			var ans = "";
+			if (err) {
+				ans = "Error : " + JSON.stringify(err);
+			} else {
+			    ans = "Data : " + JSON.stringify(data, null, ' ');
+			}
+			$("#responseArea").html("<pre>" + ans + "</pre>");
+		});
+	}
+
+$(document).ready(function() {
+        showOrdersUsingDynamo();
+    /*
+    var myUrl = 'https://hb9012p73i.execute-api.us-east-1.amazonaws.com/devStage/users/' + $("#userId").val();
+    var myData = {};
+    myData.httpMethod = "GET";
+    var queryStringParameters = {};
+    queryStringParameters.TableName = 'orders';
+    queryStringParameters.item_ordered = $("#itemOrdered").val();
+    myData.queryStringParameters = queryStringParameters;
+    $.ajax({
+        type : 'GET',
+        url : myUrl,
+        data : myData,
+        contentType : "application/json",
+        success : function(data) {
+            alert(JSON.stringify(data));
+            
+            //{"Items":[{"posted":"1579418097220","post":"A second post"}],"Count":1,"ScannedCount":1}
+            
+            $("#entries").html('');
+            var posts = data.Items;
+            alert(JSON.stringify(posts));
+            data.Items.forEach(function(data) {
+                $("#entries").append('<p>Posted : ' + data.posted + '<br />' + data.post + '</p>');
+            });
+        }
+    });
+    */
+});
+
+</script>
+</head>
+<body>
+    User Id : <input id="userId" type="text" value="" />
+    <br>
+    Order Time: <input id="orderTime" type="text" value="" />
+    <br>
+    Item Ordered : <input id="itemOrdered" type="text" value="" />
+    <br>
+    Total Amount : <input id="totalAmount" type="text" value="" />
+    <br>
+    <button onclick="sendMsgToSqs();">Send Order Using SQS</button>
+    <button onclick="showOrdersUsingDynamo();">Show Orders Using Dynamo</button>
+    
+    <script>
+        initUi();
+    </script>
+    <br />
+    <div id="responseArea">
+
+    </div>
+</body>
+</html>

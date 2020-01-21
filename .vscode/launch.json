@@ -4,6 +4,8 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+
         {
             "type": "node",
             "request": "launch",
@@ -36,16 +38,40 @@
             "console": "integratedTerminal"
         },
         {
+            "name": "Launch my-random-number.htm",
+            "type": "chrome",
+            "request": "launch",
+            "file": "c:/dev/dev-workspaces-2020/git-helloworld-repo/hello-world-repo/my-random-number.htm"
+        }, 
+        {
+            "name": "Launch my-guest-book.htm",
+            "type": "chrome",
+            "request": "launch",
+            "file": "c:/dev/dev-workspaces-2020/git-helloworld-repo/hello-world-repo/my-guest-book.htm"
+        }, 
+        {
             "name": "Launch get-employees.htm",
             "type": "chrome",
             "request": "launch",
             "file": "C:/temp/it460/2020/spring/setup/lambda-rds/lambda-aurora/get-employees.htm"
-        },        {
+        },        
+        {
             "name": "Launch my-queue-demo.htm",
             "type": "chrome",
             "request": "launch",
             "file": "C:/dev/dev-workspaces-2020/git-helloworld-repo/hello-world-repo/my-queue-demo.htm"
+        },        {
+            "name": "Launch my-orders-queue-demo.htm",
+            "type": "chrome",
+            "request": "launch",
+            "file": "C:/dev/dev-workspaces-2020/git-helloworld-repo/hello-world-repo/my-orders-queue-demo.htm"
         },
+        {
+            "name": "Launch my-weather-function.htm",
+            "type": "chrome",
+            "request": "launch",
+            "file": "c:/dev/dev-workspaces-2020/git-helloworld-repo/hello-world-repo/my-weather-function.htm"
+        }, 
 
     ]
 }

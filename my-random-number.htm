@@ -1,0 +1,48 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script language="JavaScript">
+/*
+aws lambda remove-permission --function-name "arn:aws:lambda:us-east-1:672312526406:function:myWeatherFunction2" --statement-id 12ee0b29-6e6b-56a9-ae6b-457d774f4326
+aws lambda add-permission --statement-id 12ee0b29-6e6b-56a9-ae6b-457d774f4326 --action lambda:InvokeFunction --function-name "arn:aws:lambda:us-east-1:672312526406:function:myWeatherFunction2" --principal apigateway.amazonaws.com --source-arn "arn:aws:execute-api:us-east-1:672312526406:wpmlb110e4/ * \ * /myWeatherFunction2"
+*/
+        var API_URL = 'https://d2jrckr74c.execute-api.us-east-1.amazonaws.com/prod/number/';
+
+        function getRandomNumber() {
+                
+            $("#ajaxResponse").html("");
+            
+            var myUrl = API_URL + "?min=" + encodeURIComponent($('#min').val()) + "&max=" + encodeURIComponent($('#max').val());
+            $.ajax({
+                type : 'GET',
+                url : myUrl,
+                success : function(data) {
+                    //alert("Success !" + JSON.stringify(data));
+                    $("#ajaxResponse").html("Your random number is " + JSON.stringify(data.generatedNumber));
+                }
+            });
+        };
+        /*
+                        data : JSON.stringify({}),
+                contentType : "application/json",
+                cache : false,
+                headers : {
+                    "Accept" : "application/json",
+                    "Cache-Control": "max=0",
+                    "Access-Control-Allow-Origin" : "*"
+                },
+        */
+    </script>
+</head>
+<body>
+    <h3>Get Random Number</h3>
+    Min : <input id="min" value="1">
+    <br />
+    Max : <input id="max" value="100">
+    <button id="submitButton" onclick="javascript:getRandomNumber();">Submit</button>
+    <button id="clearButton" onclick="javascript:location.reload();">Clear</button>
+    <div id="ajaxResponse">
+
+    </div>
+</body>
+</html>
